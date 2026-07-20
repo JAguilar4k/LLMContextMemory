@@ -14,6 +14,7 @@ import {
   saveFavoritePrompt
 } from "./storageManager.js";
 import { sendMessage } from "./apiService.js";
+import { getToken, getTokenExpiration, setToken } from "./cookieManager.js";
 
 const ROLE_USER = "user";
 const ROLE_ASSISTANT = "assistant";
@@ -22,6 +23,7 @@ const defaultCallbacks = {
   onConversationUpdate: () => {},
   onFavoritesUpdate: () => {},
   onSessionExpired: () => {},
+  onNetworkStatus: () => {},
   onError: () => {}
 };
 
@@ -34,6 +36,7 @@ let callbacks = { ...defaultCallbacks };
  * @param {(messages: Array<object>) => void} [nextCallbacks.onConversationUpdate]
  * @param {(favorites: string[]) => void} [nextCallbacks.onFavoritesUpdate]
  * @param {(payload: object) => void} [nextCallbacks.onSessionExpired]
+ * @param {(request: {method: string, endpoint: string, status: number|string}) => void} [nextCallbacks.onNetworkStatus]
  * @param {(error: Error) => void} [nextCallbacks.onError]
  */
 export function configureAppController(nextCallbacks = {}) {
@@ -91,7 +94,9 @@ export async function handleSendPrompt(promptText) {
     saveConversation(historyWithUserPrompt);
     notify("onConversationUpdate", historyWithUserPrompt);
 
+    notify("onNetworkStatus", { method: "POST", endpoint: "/api/llm", status: "Pendiente" });
     const responseText = await sendMessage(normalizedPrompt, historyWithUserPrompt);
+    notify("onNetworkStatus", { method: "POST", endpoint: "/api/llm", status: 200 });
     const completedHistory = [
       ...historyWithUserPrompt,
       createMessage(ROLE_ASSISTANT, responseText)
@@ -103,6 +108,7 @@ export async function handleSendPrompt(promptText) {
     return completedHistory;
   } catch (error) {
     if (error && error.status === 401) {
+      notify("onNetworkStatus", { method: "POST", endpoint: "/api/llm", status: 401 });
       clearConversation();
       notify("onConversationUpdate", []);
       notify("onSessionExpired", {
@@ -117,6 +123,18 @@ export async function handleSendPrompt(promptText) {
     notify("onError", error);
     throw error;
   }
+}
+
+/** Issues a short-lived mock token through the authentication layer. */
+export function handleRenewToken(minutes = 2) {
+  const token = `tk_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  setToken(token, minutes);
+  return { expiresAt: new Date(Date.now() + minutes * 60 * 1000) };
+}
+
+/** Provides the UI with a display-safe authentication snapshot. */
+export function getTokenState() {
+  return { hasToken: Boolean(getToken()), expiresAt: getTokenExpiration() };
 }
 
 /**
@@ -149,5 +167,7 @@ export default {
   configureAppController,
   handleSendPrompt,
   handleSaveFavoritePrompt,
+  handleRenewToken,
+  getTokenState,
   getInitialAppState
 };

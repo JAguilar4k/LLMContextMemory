@@ -7,6 +7,7 @@
  */
 
 const TOKEN_COOKIE_NAME = "access_token";
+const TOKEN_EXPIRY_COOKIE_NAME = "access_token_expires_at";
 const COOKIE_PATH = "/";
 
 /**
@@ -65,6 +66,17 @@ export function setToken(tokenValue, minutes) {
     `Path=${COOKIE_PATH}`,
     "SameSite=Lax"
   ].join("; ");
+
+  // Browsers intentionally do not expose a cookie's Expires attribute to
+  // JavaScript. A matching, non-sensitive timestamp cookie lets the UI show
+  // the real countdown after a refresh without inspecting the token value.
+  document.cookie = [
+    `${encodeURIComponent(TOKEN_EXPIRY_COOKIE_NAME)}=${expiresAt.getTime()}`,
+    `Max-Age=${maxAgeSeconds}`,
+    `Expires=${expiresAt.toUTCString()}`,
+    `Path=${COOKIE_PATH}`,
+    "SameSite=Lax"
+  ].join("; ");
 }
 
 /**
@@ -95,6 +107,26 @@ export function getToken() {
 }
 
 /**
+ * Gets the expiry associated with the current access token.
+ * @returns {Date|null}
+ */
+export function getTokenExpiration() {
+  if (typeof document === "undefined" || typeof document.cookie !== "string") {
+    return null;
+  }
+
+  const match = document.cookie
+    .split("; ")
+    .map(cookie => cookie.split("="))
+    .find(([name]) => safeDecode(name) === TOKEN_EXPIRY_COOKIE_NAME);
+  const milliseconds = match ? Number(safeDecode(match.slice(1).join("="))) : NaN;
+
+  return Number.isFinite(milliseconds) && milliseconds > Date.now()
+    ? new Date(milliseconds)
+    : null;
+}
+
+/**
  * Explicitly expires the access token cookie.
  */
 export function deleteToken() {
@@ -107,10 +139,18 @@ export function deleteToken() {
     `Path=${COOKIE_PATH}`,
     "SameSite=Lax"
   ].join("; ");
+  document.cookie = [
+    `${encodeURIComponent(TOKEN_EXPIRY_COOKIE_NAME)}=`,
+    "Max-Age=0",
+    "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    `Path=${COOKIE_PATH}`,
+    "SameSite=Lax"
+  ].join("; ");
 }
 
 export default {
   setToken,
   getToken,
+  getTokenExpiration,
   deleteToken
 };

@@ -5,8 +5,9 @@
  * Favorite prompts are durable across browser restarts through localStorage.
  */
 
-const CONVERSATION_KEY = "prompt_workspace_conversation";
-const FAVORITES_KEY = "prompt_workspace_favorite_prompts";
+// These deliberately match the names displayed in the educational DevTools panel.
+const CONVERSATION_KEY = "conversacion";
+const FAVORITES_KEY = "favoritos";
 
 /**
  * Parses a JSON array from storage with a safe default. Corrupted or unexpected

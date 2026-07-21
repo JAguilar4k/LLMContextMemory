@@ -6,3 +6,5 @@ export const MessageRole = Object.freeze({
 export function isValidMessageRole(role) {
   return role === MessageRole.USER || role === MessageRole.ASSISTANT;
 }
+
+

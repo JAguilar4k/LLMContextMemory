@@ -1,44 +1,16 @@
-/**
- * Integration / Orchestration Layer
- * ---------------------------------
- * The UI imports this controller, registers callbacks, and calls the exported
- * handlers. This file coordinates storage and network modules without owning
- * DOM selectors, markup, styling, or rendering details.
- */
+import { createWorkspaceApp } from "./src/composition/createWorkspaceApp.js";
 
-import {
-  clearConversation,
-  getConversation,
-  getFavoritePrompts,
-  saveConversation,
-  saveFavoritePrompt
-} from "./storageManager.js";
-import { sendMessage } from "./apiService.js";
-import { getToken, getTokenExpiration, setToken } from "./cookieManager.js";
-
-const ROLE_USER = "user";
-const ROLE_ASSISTANT = "assistant";
+const workspaceApp = createWorkspaceApp();
 
 const defaultCallbacks = {
   onConversationUpdate: () => {},
   onFavoritesUpdate: () => {},
   onSessionExpired: () => {},
-  onNetworkStatus: () => {},
   onError: () => {}
 };
 
 let callbacks = { ...defaultCallbacks };
 
-/**
- * Registers UI callbacks without coupling this module to any specific DOM.
- *
- * @param {object} nextCallbacks
- * @param {(messages: Array<object>) => void} [nextCallbacks.onConversationUpdate]
- * @param {(favorites: string[]) => void} [nextCallbacks.onFavoritesUpdate]
- * @param {(payload: object) => void} [nextCallbacks.onSessionExpired]
- * @param {(request: {method: string, endpoint: string, status: number|string}) => void} [nextCallbacks.onNetworkStatus]
- * @param {(error: Error) => void} [nextCallbacks.onError]
- */
 export function configureAppController(nextCallbacks = {}) {
   callbacks = {
     ...callbacks,
@@ -48,10 +20,6 @@ export function configureAppController(nextCallbacks = {}) {
   };
 }
 
-/**
- * Runs UI callbacks defensively so rendering failures do not corrupt state or
- * get mistaken for API/storage failures.
- */
 function notify(callbackName, payload) {
   try {
     callbacks[callbackName](payload);
@@ -60,63 +28,19 @@ function notify(callbackName, payload) {
   }
 }
 
-/**
- * Creates a normalized chat message object for persistent conversation state.
- */
-function createMessage(role, content) {
-  return {
-    role,
-    content,
-    createdAt: new Date().toISOString()
-  };
-}
-
-/**
- * Main prompt flow used by the UI.
- *
- * @param {string} promptText - Raw prompt text received from the UI.
- * @returns {Promise<Array<object>>} Latest conversation after the operation.
- */
 export async function handleSendPrompt(promptText) {
   try {
-    const normalizedPrompt = typeof promptText === "string" ? promptText.trim() : "";
-
-    if (!normalizedPrompt) {
-      return getConversation();
-    }
-
-    const currentHistory = getConversation();
-    const historyWithUserPrompt = [
-      ...currentHistory,
-      createMessage(ROLE_USER, normalizedPrompt)
-    ];
-
-    saveConversation(historyWithUserPrompt);
-    notify("onConversationUpdate", historyWithUserPrompt);
-
-    notify("onNetworkStatus", { method: "POST", endpoint: "/api/llm", status: "Pendiente" });
-    const responseText = await sendMessage(normalizedPrompt, historyWithUserPrompt);
-    notify("onNetworkStatus", { method: "POST", endpoint: "/api/llm", status: 200 });
-    const completedHistory = [
-      ...historyWithUserPrompt,
-      createMessage(ROLE_ASSISTANT, responseText)
-    ];
-
-    saveConversation(completedHistory);
-    notify("onConversationUpdate", completedHistory);
-
-    return completedHistory;
+    const conversation = await workspaceApp.sendPrompt(promptText);
+    notify("onConversationUpdate", conversation);
+    return conversation;
   } catch (error) {
-    if (error && error.status === 401) {
-      notify("onNetworkStatus", { method: "POST", endpoint: "/api/llm", status: 401 });
-      clearConversation();
+    if (error?.status === 401) {
       notify("onConversationUpdate", []);
       notify("onSessionExpired", {
         status: 401,
         message: "Sesión expirada (401)",
         error
       });
-
       return [];
     }
 
@@ -125,42 +49,22 @@ export async function handleSendPrompt(promptText) {
   }
 }
 
-/** Issues a short-lived mock token through the authentication layer. */
-export function handleRenewToken(minutes = 2) {
-  const token = `tk_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-  setToken(token, minutes);
-  return { expiresAt: new Date(Date.now() + minutes * 60 * 1000) };
-}
-
-/** Provides the UI with a display-safe authentication snapshot. */
-export function getTokenState() {
-  return { hasToken: Boolean(getToken()), expiresAt: getTokenExpiration() };
-}
-
-/**
- * Optional orchestration helper for the favorites workflow.
- */
 export function handleSaveFavoritePrompt(promptText) {
-  const normalizedPrompt = typeof promptText === "string" ? promptText.trim() : "";
-
-  if (!normalizedPrompt) {
-    return getFavoritePrompts();
-  }
-
-  const updatedFavorites = saveFavoritePrompt(normalizedPrompt);
-  notify("onFavoritesUpdate", updatedFavorites);
-
-  return updatedFavorites;
+  const favoritePrompts = workspaceApp.saveFavoritePrompt(promptText);
+  notify("onFavoritesUpdate", favoritePrompts);
+  return favoritePrompts;
 }
 
-/**
- * Gives the UI a clean bootstrapping snapshot without reading storage itself.
- */
+export function handleRenewToken(minutes = 2) {
+  return workspaceApp.renewToken(minutes);
+}
+
+export function getTokenState() {
+  return workspaceApp.getTokenState();
+}
+
 export function getInitialAppState() {
-  return {
-    conversation: getConversation(),
-    favoritePrompts: getFavoritePrompts()
-  };
+  return workspaceApp.getInitialState();
 }
 
 export default {

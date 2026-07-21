@@ -58,7 +58,7 @@
       </div>
     </header>
 
-    <main class="mx-auto grid max-w-6xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
+    <main class="mx-auto grid max-w-7xl gap-5 px-4 py-5 sm:px-6 xl:grid-cols-[20rem_minmax(0,1fr)_17rem]">
       <aside
         class="flex min-h-[34rem] flex-col rounded-lg border border-zinc-300 bg-white p-4 shadow-sm motion-safe:animate-[slide-up_360ms_ease-out_both]"
         aria-labelledby="favorites-heading"
@@ -115,6 +115,29 @@
           </div>
         </form>
       </section>
+      <aside class="min-h-[34rem] overflow-hidden rounded-lg border border-zinc-700 bg-[#202124] text-zinc-100 shadow-sm motion-safe:animate-[slide-up_480ms_ease-out_both]" aria-labelledby="devtools-heading">
+        <div class="border-b border-zinc-600 px-4 py-3">
+          <h2 id="devtools-heading" class="text-base font-black text-white">DevTools ▸ Application</h2>
+        </div>
+        <section class="border-b border-zinc-600 px-4 py-3" aria-labelledby="devtools-session-heading">
+          <h3 id="devtools-session-heading" class="text-sm font-black text-sky-300">Session Storage</h3>
+          <p class="mt-1 text-xs font-semibold text-zinc-300">conversacion:</p>
+          <pre id="devtools-session" class="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-zinc-100" aria-live="polite">[]</pre>
+        </section>
+        <section class="border-b border-zinc-600 px-4 py-3" aria-labelledby="devtools-local-heading">
+          <h3 id="devtools-local-heading" class="text-sm font-black text-sky-300">Local Storage</h3>
+          <p class="mt-1 text-xs font-semibold text-zinc-300">favoritos:</p>
+          <pre id="devtools-local" class="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-zinc-100" aria-live="polite">[]</pre>
+        </section>
+        <section class="border-b border-zinc-600 px-4 py-3" aria-labelledby="devtools-cookies-heading">
+          <h3 id="devtools-cookies-heading" class="text-sm font-black text-sky-300">Cookies</h3>
+          <p id="devtools-cookie" class="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-zinc-100" aria-live="polite">access_token: ausente</p>
+        </section>
+        <section class="px-4 py-3" aria-labelledby="devtools-network-heading">
+          <h3 id="devtools-network-heading" class="text-sm font-black text-sky-300">Network</h3>
+          <p id="devtools-network" class="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-300" aria-live="polite">Sin solicitudes</p>
+        </section>
+      </aside>
     </main>
 
     <div

@@ -370,6 +370,36 @@ Usuario: Que tengo?
 Asistente: Por el contexto, parece que tienes hambre...
 ```
 
+## 12. Panel DevTools Application integrado
+
+Solicitud: agregar en la seccion derecha un panel visual tipo
+`DevTools ▸ Application`, integrado con el estado real de la aplicacion.
+
+Cambios aplicados:
+
+- Se agrego una tercera columna responsiva en `index.html`.
+- El panel muestra el contenido actual de:
+  - `Session Storage`: conversacion.
+  - `Local Storage`: favoritos.
+  - `Cookies`: presencia de `access_token` y tiempo restante.
+  - `Network`: ultimo `POST /api/llm` y su estado.
+- El panel se actualiza al enviar mensajes, guardar favoritos, renovar o
+  expirar el token y en cada actualizacion del contador.
+- La UI consume el estado mediante `workspaceApp`; no accede directamente a
+  `sessionStorage`, `localStorage`, cookies ni al gateway de red.
+- El valor del token no se expone: se muestra su presencia y expiracion para
+  mantener el panel educativo sin revelar una credencial.
+
+Verificacion:
+
+- Sin token: se muestra `access_token: ausente`.
+- Con token renovado: se muestra el contador de expiracion real.
+- Solicitud exitosa: `POST /api/llm` con `Status: 200`.
+- Solicitud sin token: `POST /api/llm` con `Status: 401` y detalle
+  `token expirado`.
+- Conversacion y favoritos se muestran serializados como JSON de forma segura
+  mediante `textContent`.
+
 ## Archivos principales finales
 
 - `index.html`

@@ -1,6 +1,10 @@
 const SELECTORS = {
   chat: "#conversation-feed",
   closeModal: "#close-modal",
+  devtoolsCookie: "#devtools-cookie",
+  devtoolsLocal: "#devtools-local",
+  devtoolsNetwork: "#devtools-network",
+  devtoolsSession: "#devtools-session",
   favorites: "#favorites-list",
   favoritesCount: "#favorites-count",
   form: "#prompt-form",
@@ -21,12 +25,14 @@ export class WorkspaceUi {
     this.workspaceApp = workspaceApp;
     this.lastFocusedElement = null;
     this.countdownIntervalId = null;
+    this.lastNetworkRequest = null;
   }
 
   mount() {
     const initialState = this.workspaceApp.getInitialState();
     this.renderChat(initialState.conversation);
     this.renderFavorites(initialState.favoritePrompts);
+    this.renderDevTools(initialState);
     this.updateTokenCountdown();
     this.#bindEvents();
 
@@ -93,9 +99,22 @@ export class WorkspaceUi {
     });
   }
 
+  renderDevTools(state = this.workspaceApp.getInitialState()) {
+    const { conversation = [], favoritePrompts = [] } = state;
+    const { hasToken, expiresAt } = this.workspaceApp.getTokenState();
+
+    this.#element("devtoolsSession").textContent = JSON.stringify(conversation, null, 2);
+    this.#element("devtoolsLocal").textContent = JSON.stringify(favoritePrompts, null, 2);
+    this.#element("devtoolsCookie").textContent = this.#formatCookieState({ hasToken, expiresAt });
+    const network = this.#element("devtoolsNetwork");
+    network.textContent = this.#formatNetworkState();
+    network.className = `mt-1 whitespace-pre-wrap text-xs leading-5 ${this.#networkTextClass()}`;
+  }
+
   updateTokenCountdown() {
     const tokenBadge = this.#element("tokenBadge");
     const { hasToken, expiresAt } = this.workspaceApp.getTokenState();
+    this.renderDevTools();
 
     tokenBadge.classList.remove("border-sky-400", "motion-safe:animate-[soft-glow_1600ms_ease-in-out_infinite]");
 
@@ -147,13 +166,21 @@ export class WorkspaceUi {
 
       this.#setSubmitting(true);
       this.#setStatus("Enviando...", "success");
+      this.#setNetworkRequest({ method: "POST", endpoint: "/api/llm", status: "Pendiente" });
 
       try {
         const conversation = await this.workspaceApp.sendPrompt(prompt);
         this.renderChat(conversation);
+        this.#setNetworkRequest({ method: "POST", endpoint: "/api/llm", status: 200 });
         this.#element("prompt").value = "";
         this.#setStatus("");
       } catch (error) {
+        this.#setNetworkRequest({
+          method: "POST",
+          endpoint: "/api/llm",
+          status: error?.status || "Error",
+          detail: error?.status === 401 ? "token expirado" : error?.message
+        });
         if (error?.status === 401) {
           this.renderChat([]);
           this.showExpiredModal();
@@ -178,6 +205,7 @@ export class WorkspaceUi {
       try {
         const favoritePrompts = this.workspaceApp.saveFavoritePrompt(prompt);
         this.renderFavorites(favoritePrompts);
+        this.renderDevTools({ ...this.workspaceApp.getInitialState(), favoritePrompts });
         this.#setStatus("Prompt guardado en favoritos.", "success");
       } catch (error) {
         this.#setStatus(error?.message || "No se pudo guardar el favorito.");
@@ -244,6 +272,51 @@ export class WorkspaceUi {
   #formatRemaining(milliseconds) {
     const seconds = Math.max(0, Math.ceil(milliseconds / 1000));
     return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  }
+
+  #setNetworkRequest(request) {
+    this.lastNetworkRequest = request;
+    this.renderDevTools();
+  }
+
+  #formatCookieState({ hasToken, expiresAt }) {
+    if (!hasToken) {
+      return "access_token: ausente";
+    }
+
+    if (!expiresAt) {
+      return "access_token: presente\nExpira: desconocido";
+    }
+
+    const remainingTime = expiresAt.getTime() - Date.now();
+    return remainingTime > 0
+      ? `access_token: presente\nExpira en: ${this.#formatRemaining(remainingTime)}`
+      : "access_token: expirado";
+  }
+
+  #formatNetworkState() {
+    if (!this.lastNetworkRequest) {
+      return "Sin solicitudes";
+    }
+
+    const { method, endpoint, status, detail } = this.lastNetworkRequest;
+    return [
+      `${method} ${endpoint}`,
+      `Status: ${status}`,
+      detail ? `(${detail})` : ""
+    ].filter(Boolean).join("\n");
+  }
+
+  #networkTextClass() {
+    if (this.lastNetworkRequest?.status === 401 || this.lastNetworkRequest?.status === "Error") {
+      return "text-rose-300";
+    }
+
+    if (this.lastNetworkRequest?.status === 200) {
+      return "text-emerald-300";
+    }
+
+    return "text-zinc-300";
   }
 
   #focusableModalItems() {

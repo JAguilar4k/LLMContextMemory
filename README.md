@@ -104,6 +104,9 @@ src/
   main.js
   composition/
   application/
+    errors/
+    ports/
+    use-cases/
   domain/
   infrastructure/
   presentation/
@@ -112,6 +115,23 @@ src/
 Los archivos raiz (`cookieManager.js`, `storageManager.js`, `apiService.js`,
 `appController.js`) funcionan como fachadas compatibles con los requerimientos
 originales. La implementacion principal vive dentro de `src/`.
+
+## Arquitectura aplicada
+
+- `domain/`: reglas del negocio. Contiene objetos inmutables como
+  `Conversation`, `ChatMessage`, `PromptText` y `FavoritePrompt`. No importa
+  DOM, cookies, storage, red ni UI.
+- `application/`: casos de uso y puertos. Orquesta acciones como enviar un
+  prompt, renovar token y guardar favoritos. Depende de abstracciones, no de
+  implementaciones del navegador.
+- `infrastructure/`: adaptadores concretos del navegador: cookies,
+  `sessionStorage`, `localStorage`, generador de token y gateway LLM simulado.
+- `presentation/`: renderizado y eventos de UI. No decide reglas de negocio.
+- `composition/`: punto de ensamblaje. Conecta casos de uso con adaptadores.
+
+Los puertos se validan en tiempo de ejecucion con `assertPort`, por lo que un
+adaptador nuevo debe implementar los metodos esperados antes de poder conectarse
+a la aplicacion.
 
 ## Solucion de problemas
 

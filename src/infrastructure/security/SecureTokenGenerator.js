@@ -1,4 +1,8 @@
 export class SecureTokenGenerator {
+  constructor() {
+    Object.freeze(this);
+  }
+
   generate() {
     if (globalThis.crypto?.randomUUID) {
       return `mock_${globalThis.crypto.randomUUID()}`;

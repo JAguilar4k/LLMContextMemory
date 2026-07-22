@@ -4,13 +4,16 @@ const CONVERSATION_KEY = "conversacion";
 const LEGACY_FIXED_RESPONSE = "Esta es una respuesta simulada basada en tu prompt";
 
 export class SessionConversationRepository {
+  #storage;
+
   constructor(storage = globalThis.sessionStorage) {
-    this.storage = storage;
+    this.#storage = storage;
+    Object.freeze(this);
   }
 
   findCurrent() {
     try {
-      const messages = this.#parseArray(this.storage.getItem(CONVERSATION_KEY));
+      const messages = this.#parseArray(this.#storage.getItem(CONVERSATION_KEY));
 
       if (this.#hasLegacyFixedResponses(messages)) {
         this.clear();
@@ -25,7 +28,7 @@ export class SessionConversationRepository {
 
   save(conversation) {
     try {
-      this.storage.setItem(CONVERSATION_KEY, JSON.stringify(conversation.toPrimitives()));
+      this.#storage.setItem(CONVERSATION_KEY, JSON.stringify(conversation.toPrimitives()));
     } catch (error) {
       throw this.#storageError("No se pudo guardar la conversación en sessionStorage.", error);
     }
@@ -33,7 +36,7 @@ export class SessionConversationRepository {
 
   clear() {
     try {
-      this.storage.removeItem(CONVERSATION_KEY);
+      this.#storage.removeItem(CONVERSATION_KEY);
     } catch (error) {
       throw this.#storageError("No se pudo limpiar la conversación de sessionStorage.", error);
     }

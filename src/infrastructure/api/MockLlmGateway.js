@@ -1,18 +1,26 @@
-import { HttpError } from "../../domain/errors/HttpError.js";
+import { HttpError } from "../../application/errors/HttpError.js";
+import { assertPort } from "../../application/ports/assertPort.js";
 
 const MOCK_ENDPOINT = "/api/llm";
 const MOCK_LATENCY_MS = 500;
 const CONTEXT_WINDOW_SIZE = 4;
 
 export class MockLlmGateway {
+  #tokenRepository;
+  #timer;
+
   constructor({ tokenRepository, timer = globalThis }) {
-    this.tokenRepository = tokenRepository;
-    this.timer = timer;
+    assertPort("TokenRepositoryPort", tokenRepository, ["getToken"]);
+    assertPort("TimerPort", timer, ["setTimeout"]);
+
+    this.#tokenRepository = tokenRepository;
+    this.#timer = timer;
+    Object.freeze(this);
   }
 
   async sendMessage({ prompt, conversation }) {
     try {
-      const token = this.tokenRepository.getToken();
+      const token = this.#tokenRepository.getToken();
 
       if (!token) {
         throw new HttpError(401, "Token expirado", {
@@ -51,7 +59,7 @@ export class MockLlmGateway {
 
   #simulateFetchRequest(payload) {
     return new Promise(resolve => {
-      this.timer.setTimeout(() => {
+      this.#timer.setTimeout(() => {
         resolve({
           ok: true,
           status: 200,

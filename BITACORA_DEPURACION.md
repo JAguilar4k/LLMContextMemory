@@ -400,6 +400,39 @@ Verificacion:
 - Conversacion y favoritos se muestran serializados como JSON de forma segura
   mediante `textContent`.
 
+## 13. Refuerzo estricto DDD, Hexagonal y SOLID
+
+Solicitud: aplicar DDD, arquitectura Hexagonal y SOLID al pie de la letra.
+
+Cambios aplicados:
+
+- Se movio `HttpError` desde `domain/errors/` hacia `application/errors/`.
+  El dominio ya no contiene conceptos HTTP.
+- Se elimino `src/domain/errors/HttpError.js` porque era una mezcla de
+  infraestructura/red dentro del dominio.
+- Se agrego `src/application/ports/assertPort.js` para validar en tiempo de
+  ejecucion que los adaptadores cumplan los metodos esperados por cada puerto.
+- Los casos de uso ahora encapsulan sus dependencias con campos privados `#`.
+- Los casos de uso quedan congelados con `Object.freeze(this)` luego de recibir
+  dependencias validas.
+- `ChatMessage`, `Conversation` y `PromptText` quedaron reforzados como objetos
+  de dominio inmutables.
+- Los adaptadores de infraestructura encapsulan sus dependencias internas:
+  cookies, storage, timer y generador de token.
+- Se actualizo el versionado de imports a `20260722-architecture-v1` para evitar
+  cache de navegador.
+- Se documento la frontera arquitectonica en `README.md`.
+
+Verificacion:
+
+- `node --check` paso sin errores en los modulos de dominio, aplicacion,
+  infraestructura, composicion, presentacion y fachadas raiz.
+- Se valido en navegador el flujo de token valido, respuesta contextual y flujo
+  `401`.
+- En `401`, se borra solo `sessionStorage` de conversacion y se conserva
+  `localStorage` de favoritos.
+- La prueba XSS con HTML malicioso se renderiza como texto y no ejecuta codigo.
+
 ## Archivos principales finales
 
 - `index.html`

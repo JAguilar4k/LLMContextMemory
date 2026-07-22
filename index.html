@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <link rel="icon" href="data:," />
     <title>Prompt Engineer Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -35,32 +36,32 @@
       }
     </style>
   </head>
-  <body class="min-h-screen bg-stone-100 text-zinc-950 antialiased">
+  <body class="min-h-screen overflow-x-hidden bg-stone-100 text-zinc-950 antialiased">
     <header class="border-b border-zinc-300 bg-white/95 shadow-sm">
-      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <div class="mx-auto flex w-full max-w-[100rem] flex-col gap-4 px-3 py-4 sm:px-5 md:flex-row md:items-center md:justify-between lg:px-6">
         <div class="motion-safe:animate-[fade-in_420ms_ease-out_both]">
           <p class="text-xs font-bold uppercase tracking-wide text-emerald-700">Workspace</p>
           <h1 class="text-2xl font-black tracking-normal text-zinc-950 sm:text-3xl">Prompt Engineer</h1>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="grid w-full gap-3 sm:grid-cols-[minmax(0,1fr)_auto] md:w-auto md:min-w-[22rem] md:items-center">
           <output
             id="token-countdown"
-            class="min-w-40 rounded-md border border-zinc-700 bg-zinc-950 px-4 py-2 text-center text-sm font-bold text-white transition duration-300 motion-safe:animate-[soft-glow_1600ms_ease-in-out_infinite]"
+            class="min-w-0 rounded-md border border-zinc-700 bg-zinc-950 px-4 py-2 text-center text-sm font-bold text-white transition duration-300 motion-safe:animate-[soft-glow_1600ms_ease-in-out_infinite]"
             aria-live="polite"
           >Token: sin sesión</output>
           <button
             id="issue-token"
             type="button"
-            class="rounded-md bg-sky-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-sky-800 hover:shadow-md active:translate-y-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300"
+            class="w-full rounded-md bg-sky-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-sky-800 hover:shadow-md active:translate-y-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 sm:w-auto"
           >Renovar token</button>
         </div>
       </div>
     </header>
 
-    <main class="mx-auto grid max-w-7xl gap-5 px-4 py-5 sm:px-6 xl:grid-cols-[20rem_minmax(0,1fr)_17rem]">
+    <main class="mx-auto grid w-full max-w-[100rem] grid-cols-1 gap-4 px-3 py-4 sm:px-5 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)] lg:px-6 2xl:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)_minmax(15rem,18rem)]">
       <aside
-        class="flex min-h-[34rem] flex-col rounded-lg border border-zinc-300 bg-white p-4 shadow-sm motion-safe:animate-[slide-up_360ms_ease-out_both]"
+        class="order-2 flex min-h-[18rem] min-w-0 flex-col rounded-lg border border-zinc-300 bg-white p-4 shadow-sm motion-safe:animate-[slide-up_360ms_ease-out_both] lg:order-1 lg:min-h-[34rem]"
         aria-labelledby="favorites-heading"
       >
         <div class="flex items-center justify-between gap-3 border-b border-zinc-200 pb-3">
@@ -78,7 +79,7 @@
       </aside>
 
       <section
-        class="flex min-h-[34rem] flex-col rounded-lg border border-zinc-300 bg-white p-4 shadow-sm motion-safe:animate-[slide-up_420ms_ease-out_both]"
+        class="order-1 flex min-h-[70vh] min-w-0 flex-col rounded-lg border border-zinc-300 bg-white p-4 shadow-sm motion-safe:animate-[slide-up_420ms_ease-out_both] lg:order-2 lg:min-h-[34rem]"
         aria-labelledby="conversation-heading"
       >
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3">
@@ -88,7 +89,7 @@
 
         <div
           id="conversation-feed"
-          class="mt-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1"
+          class="mt-4 flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto pr-1"
           aria-live="polite"
           aria-relevant="additions text"
           aria-label="Mensajes de la conversación"
@@ -105,17 +106,17 @@
             class="mt-2 block w-full resize-none rounded-md border border-zinc-500 bg-white p-3 text-sm text-zinc-950 shadow-inner outline-none transition duration-200 placeholder:text-zinc-500 focus:border-sky-700 focus:ring-4 focus:ring-sky-200"
             placeholder="Escribe tu prompt..."
           ></textarea>
-          <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p id="form-status" class="min-h-6 text-sm font-bold text-rose-800" aria-live="assertive"></p>
+          <div class="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <p id="form-status" class="min-h-6 min-w-0 text-sm font-bold text-rose-800" aria-live="assertive"></p>
             <button
               id="send-prompt"
               type="submit"
-              class="rounded-md bg-emerald-700 px-5 py-3 text-sm font-black text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-800 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:shadow-none disabled:hover:translate-y-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
+              class="w-full rounded-md bg-emerald-700 px-5 py-3 text-sm font-black text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-800 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:shadow-none disabled:hover:translate-y-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 sm:w-auto"
             >Enviar</button>
           </div>
         </form>
       </section>
-      <aside class="min-h-[34rem] overflow-hidden rounded-lg border border-zinc-700 bg-[#202124] text-zinc-100 shadow-sm motion-safe:animate-[slide-up_480ms_ease-out_both]" aria-labelledby="devtools-heading">
+      <aside class="order-3 min-h-[18rem] min-w-0 overflow-hidden rounded-lg border border-zinc-700 bg-[#202124] text-zinc-100 shadow-sm motion-safe:animate-[slide-up_480ms_ease-out_both] lg:col-span-2 2xl:col-span-1 2xl:min-h-[34rem]" aria-labelledby="devtools-heading">
         <div class="border-b border-zinc-600 px-4 py-3">
           <h2 id="devtools-heading" class="text-base font-black text-white">DevTools ▸ Application</h2>
         </div>
@@ -168,6 +169,6 @@
       </section>
     </div>
 
-    <script type="module" src="./src/main.js?v=20260721-contextual-v2"></script>
+    <script type="module" src="./src/main.js?v=20260722-architecture-v1"></script>
   </body>
 </html>

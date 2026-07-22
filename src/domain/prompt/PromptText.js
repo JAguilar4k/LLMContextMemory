@@ -3,6 +3,8 @@ import { DomainError } from "../errors/DomainError.js";
 const MAX_PROMPT_LENGTH = 2000;
 
 export class PromptText {
+  #value;
+
   constructor(value) {
     const normalizedValue = typeof value === "string" ? value.trim() : "";
 
@@ -14,11 +16,11 @@ export class PromptText {
       throw new DomainError(`El prompt no puede superar ${MAX_PROMPT_LENGTH} caracteres.`);
     }
 
-    this.value = normalizedValue;
+    this.#value = normalizedValue;
     Object.freeze(this);
   }
 
   toString() {
-    return this.value;
+    return this.#value;
   }
 }

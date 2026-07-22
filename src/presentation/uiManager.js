@@ -54,8 +54,8 @@ export class WorkspaceUi {
       const isUser = message?.role === "user";
       const article = document.createElement("article");
       article.className = isUser
-        ? "ml-auto max-w-[85%] rounded-lg bg-sky-700 px-4 py-3 text-white shadow-sm motion-safe:animate-[slide-up_220ms_ease-out_both]"
-        : "mr-auto max-w-[85%] rounded-lg bg-zinc-200 px-4 py-3 text-zinc-950 shadow-sm motion-safe:animate-[slide-up_220ms_ease-out_both]";
+        ? "ml-auto max-w-full rounded-lg bg-sky-700 px-4 py-3 text-white shadow-sm motion-safe:animate-[slide-up_220ms_ease-out_both] sm:max-w-[85%]"
+        : "mr-auto max-w-full rounded-lg bg-zinc-200 px-4 py-3 text-zinc-950 shadow-sm motion-safe:animate-[slide-up_220ms_ease-out_both] sm:max-w-[85%]";
 
       const label = document.createElement("p");
       label.className = "mb-1 text-xs font-black uppercase tracking-wide opacity-80";
@@ -245,8 +245,8 @@ export class WorkspaceUi {
     const status = this.#element("status");
     status.textContent = message;
     status.className = tone === "success"
-      ? "min-h-6 text-sm font-bold text-emerald-800"
-      : "min-h-6 text-sm font-bold text-rose-800";
+      ? "min-h-6 min-w-0 text-sm font-bold text-emerald-800"
+      : "min-h-6 min-w-0 text-sm font-bold text-rose-800";
   }
 
   #setSubmitting(isSubmitting) {

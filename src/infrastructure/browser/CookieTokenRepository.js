@@ -3,9 +3,13 @@ const ACCESS_TOKEN_EXPIRY_COOKIE = "access_token_expires_at";
 const COOKIE_PATH = "/";
 
 export class CookieTokenRepository {
+  #documentRef;
+  #locationRef;
+
   constructor({ documentRef = globalThis.document, locationRef = globalThis.location } = {}) {
-    this.documentRef = documentRef;
-    this.locationRef = locationRef;
+    this.#documentRef = documentRef;
+    this.#locationRef = locationRef;
+    Object.freeze(this);
   }
 
   setToken(tokenValue, minutes) {
@@ -24,12 +28,12 @@ export class CookieTokenRepository {
     const expiresAt = new Date(Date.now() + durationMs);
     const attributes = this.#buildCookieAttributes(maxAgeSeconds, expiresAt);
 
-    this.documentRef.cookie = [
+    this.#documentRef.cookie = [
       `${encodeURIComponent(ACCESS_TOKEN_COOKIE)}=${encodeURIComponent(tokenValue)}`,
       ...attributes
     ].join("; ");
 
-    this.documentRef.cookie = [
+    this.#documentRef.cookie = [
       `${encodeURIComponent(ACCESS_TOKEN_EXPIRY_COOKIE)}=${String(expiresAt.getTime())}`,
       ...attributes
     ].join("; ");
@@ -56,19 +60,19 @@ export class CookieTokenRepository {
 
     const attributes = this.#buildCookieAttributes(0, new Date(0));
 
-    this.documentRef.cookie = [
+    this.#documentRef.cookie = [
       `${encodeURIComponent(ACCESS_TOKEN_COOKIE)}=`,
       ...attributes
     ].join("; ");
 
-    this.documentRef.cookie = [
+    this.#documentRef.cookie = [
       `${encodeURIComponent(ACCESS_TOKEN_EXPIRY_COOKIE)}=`,
       ...attributes
     ].join("; ");
   }
 
   #assertCookieSupport() {
-    if (!this.documentRef || typeof this.documentRef.cookie !== "string") {
+    if (!this.#documentRef || typeof this.#documentRef.cookie !== "string") {
       throw new Error("Cookie API no disponible fuera del navegador.");
     }
   }
@@ -79,16 +83,16 @@ export class CookieTokenRepository {
       `Expires=${expiresAt.toUTCString()}`,
       `Path=${COOKIE_PATH}`,
       "SameSite=Strict",
-      this.locationRef?.protocol === "https:" ? "Secure" : null
+      this.#locationRef?.protocol === "https:" ? "Secure" : null
     ].filter(Boolean);
   }
 
   #getCookieValue(cookieName) {
-    if (!this.documentRef || typeof this.documentRef.cookie !== "string") {
+    if (!this.#documentRef || typeof this.#documentRef.cookie !== "string") {
       return null;
     }
 
-    const cookies = this.documentRef.cookie ? this.documentRef.cookie.split("; ") : [];
+    const cookies = this.#documentRef.cookie ? this.#documentRef.cookie.split("; ") : [];
 
     for (const cookie of cookies) {
       const separatorIndex = cookie.indexOf("=");

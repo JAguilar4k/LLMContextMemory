@@ -1,5 +1,5 @@
-import { createWorkspaceApp } from "./composition/createWorkspaceApp.js?v=20260721-contextual-v2";
-import { WorkspaceUi } from "./presentation/uiManager.js?v=20260721-contextual-v2";
+import { createWorkspaceApp } from "./composition/createWorkspaceApp.js?v=20260722-architecture-v1";
+import { WorkspaceUi } from "./presentation/uiManager.js?v=20260722-architecture-v1";
 
 function bootstrap() {
   const workspaceApp = createWorkspaceApp();

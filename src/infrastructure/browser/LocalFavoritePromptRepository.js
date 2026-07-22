@@ -1,13 +1,16 @@
 const FAVORITES_KEY = "favoritos";
 
 export class LocalFavoritePromptRepository {
+  #storage;
+
   constructor(storage = globalThis.localStorage) {
-    this.storage = storage;
+    this.#storage = storage;
+    Object.freeze(this);
   }
 
   findAll() {
     try {
-      return this.#parseArray(this.storage.getItem(FAVORITES_KEY))
+      return this.#parseArray(this.#storage.getItem(FAVORITES_KEY))
         .filter(prompt => typeof prompt === "string");
     } catch {
       return [];
@@ -18,7 +21,7 @@ export class LocalFavoritePromptRepository {
     const updatedFavorites = [...this.findAll(), favoritePrompt.toString()];
 
     try {
-      this.storage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
+      this.#storage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
       return updatedFavorites;
     } catch (error) {
       throw this.#storageError("No se pudo guardar el prompt favorito en localStorage.", error);

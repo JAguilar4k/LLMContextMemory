@@ -2,6 +2,10 @@ import { DomainError } from "../errors/DomainError.js";
 import { isValidMessageRole, MessageRole } from "./MessageRole.js";
 
 export class ChatMessage {
+  #role;
+  #content;
+  #createdAt;
+
   constructor({ role, content, createdAt = new Date().toISOString() }) {
     if (!isValidMessageRole(role)) {
       throw new DomainError("Rol de mensaje inválido.");
@@ -11,9 +15,9 @@ export class ChatMessage {
       throw new DomainError("El contenido del mensaje debe ser texto.");
     }
 
-    this.role = role;
-    this.content = content;
-    this.createdAt = createdAt;
+    this.#role = role;
+    this.#content = content;
+    this.#createdAt = this.#normalizeCreatedAt(createdAt);
     Object.freeze(this);
   }
 
@@ -29,15 +33,36 @@ export class ChatMessage {
     return new ChatMessage({
       role: message?.role,
       content: typeof message?.content === "string" ? message.content : "",
-      createdAt: typeof message?.createdAt === "string" ? message.createdAt : new Date().toISOString()
+      createdAt: message?.createdAt
     });
+  }
+
+  get role() {
+    return this.#role;
+  }
+
+  get content() {
+    return this.#content;
+  }
+
+  get createdAt() {
+    return this.#createdAt;
   }
 
   toPrimitives() {
     return {
-      role: this.role,
-      content: this.content,
-      createdAt: this.createdAt
+      role: this.#role,
+      content: this.#content,
+      createdAt: this.#createdAt
     };
+  }
+
+  #normalizeCreatedAt(createdAt) {
+    if (typeof createdAt !== "string") {
+      return new Date().toISOString();
+    }
+
+    const parsedDate = new Date(createdAt);
+    return Number.isNaN(parsedDate.getTime()) ? new Date().toISOString() : createdAt;
   }
 }

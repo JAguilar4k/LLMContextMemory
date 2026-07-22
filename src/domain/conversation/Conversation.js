@@ -4,9 +4,10 @@ export class Conversation {
   #messages;
 
   constructor(messages = []) {
-    this.#messages = messages.map(message =>
+    this.#messages = Object.freeze(messages.map(message =>
       message instanceof ChatMessage ? message : ChatMessage.fromPrimitives(message)
-    );
+    ));
+    Object.freeze(this);
   }
 
   static empty() {

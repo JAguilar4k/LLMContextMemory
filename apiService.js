@@ -1,5 +1,5 @@
-import { HttpError } from "./src/domain/errors/HttpError.js";
-import { MockLlmGateway } from "./src/infrastructure/api/MockLlmGateway.js?v=20260721-contextual-v2";
+import { HttpError } from "./src/application/errors/HttpError.js";
+import { MockLlmGateway } from "./src/infrastructure/api/MockLlmGateway.js?v=20260722-architecture-v1";
 import { getToken } from "./cookieManager.js";
 
 const llmGateway = new MockLlmGateway({

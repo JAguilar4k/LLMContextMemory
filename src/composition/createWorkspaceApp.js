@@ -3,7 +3,7 @@ import { GetWorkspaceStateUseCase } from "../application/use-cases/GetWorkspaceS
 import { RenewTokenUseCase } from "../application/use-cases/RenewTokenUseCase.js";
 import { SaveFavoritePromptUseCase } from "../application/use-cases/SaveFavoritePromptUseCase.js";
 import { SendPromptUseCase } from "../application/use-cases/SendPromptUseCase.js";
-import { MockLlmGateway } from "../infrastructure/api/MockLlmGateway.js?v=20260721-contextual-v2";
+import { MockLlmGateway } from "../infrastructure/api/MockLlmGateway.js?v=20260722-architecture-v1";
 import { CookieTokenRepository } from "../infrastructure/browser/CookieTokenRepository.js";
 import { LocalFavoritePromptRepository } from "../infrastructure/browser/LocalFavoritePromptRepository.js";
 import { SessionConversationRepository } from "../infrastructure/browser/SessionConversationRepository.js";

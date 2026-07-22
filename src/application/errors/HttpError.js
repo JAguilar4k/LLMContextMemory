@@ -4,5 +4,7 @@ export class HttpError extends Error {
     this.name = "HttpError";
     this.status = status;
     this.details = details;
+    Object.freeze(this.details);
+    Object.freeze(this);
   }
 }
